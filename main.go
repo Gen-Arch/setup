@@ -1,8 +1,10 @@
 package main
 
 import (
-  "fmt"
   "os"
+  "os/exec"
+  "fmt"
+  "strings"
   "path/filepath"
   "gopkg.in/src-d/go-git.v4"
 )
@@ -40,18 +42,38 @@ func symlink(file string) {
   fmt.Printf("create symlink -> " + symfile + "\n")
 }
 
+
+func run(comand string) {
+  coms := strings.Split(comand, " ")
+  com  := coms[0]
+  opt  := coms[1:]
+
+  out, err := exec.Command(com, opt...).Output()
+
+  if err != nil {
+    fmt.Printf("command error -> "+ com + " " + strings.Join(opt, " ") + "\n")
+    fmt.Printf("output: %s", out)
+    os.Exit(1)
+  }
+  fmt.Printf("%s", out)
+}
+
 func main() {
-  repos   := gits()
-  rcfiles := rcs()
+  dotfile_dir := filepath.Join(os.Getenv("HOME"),"dotfiles", "configs")
+  repos       := gits()
+  rcfiles     := rcs(dotfile_dir)
+  commands    := setup_commands()
 
-  for i := 0; i < len(repos); i++ {
-    var res string
-    res = git_clone(repos[i])
-
+  for _, repo := range repos {
+    res := git_clone(repo)
     fmt.Printf(res)
   }
 
-  for i := 0; i < len(rcfiles); i++ {
-    symlink(rcfiles[i])
+  for _, file := range rcfiles {
+    symlink(file)
+  }
+
+  for _, command := range commands {
+    run(command)
   }
 }

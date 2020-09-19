@@ -3,6 +3,7 @@ package main
 import (
   "os"
   "path/filepath"
+  "io/ioutil"
 )
 
 type Gits struct {
@@ -10,16 +11,18 @@ type Gits struct {
   dir string
 }
 
-func rcs() []string {
-  rcfiles := []string {
-    "vimrc",
-    "zshrc",
-    "bashrc",
-    "aliasrc",
-    "tmux.conf",
-    "hyper.js",
+func rcs(dir string) []string {
+  var rcfiles []string
+  var files   []os.FileInfo
+
+  files, err := ioutil.ReadDir(dir)
+  if err != nil {
+    panic(err)
   }
 
+  for _, file := range files {
+    rcfiles = append(rcfiles, file.Name())
+  }
   return rcfiles
 }
 
@@ -30,5 +33,11 @@ func gits() []Gits {
   }
 
   return gitfiles
+}
 
+func setup_commands() []string {
+  commands := []string {
+  }
+
+  return commands
 }
